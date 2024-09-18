@@ -1,0 +1,1 @@
+this is the python code which create candlestick graph for Gold vs US dollar in 1 second time period by using metatrader5. if you don't have the metatrader5 and python is not installed on your system so you can't use it.
