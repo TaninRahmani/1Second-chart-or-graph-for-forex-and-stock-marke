@@ -24,26 +24,50 @@ root.grid_rowconfigure(1, weight=2)
 # LabelFrames for layout
 info_frame = LabelFrame(root, text="Information", bg="white")
 info_frame.grid(row=0, sticky="nsew")
-
-
-
+#--------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------
 graph_frame = LabelFrame(root, text="Graph", bg="white")
 graph_frame.grid(row=1, sticky="nsew")
 
 
+# Global variable for candlestick data and symbol
 candlestick_data = pd.DataFrame()
-data2graph= pd.DataFrame()
-symbol="XAUUSD"
+data2graph = pd.DataFrame()
+symbol = tk.StringVar(value="XAUUSD")  # Default symbol
+
+# Function to display the input and update the global symbol
+def display_input():
+    user_symbol = entry.get()  # Get the text from the Entry widget
+    label.config(text=f"Selected symbol: {user_symbol}")  # Update the label
+    symbol.set(user_symbol)  # Update the symbol StringVar
+
+# Create an Entry widget to enter the trading symbol
+entry = Entry(info_frame, textvariable=symbol, width=30)
+entry.pack(pady=5)
+
+# Button to submit the input
+button = Button(info_frame, text="Submit", command=display_input)
+button.pack(pady=5)
+
+# Label to provide instructions for symbol entry
+label = Label(info_frame, text="Enter symbol (e.g., XAUUSD, EURUSD):")
+label.pack(pady=5)
+
+# Function to fetch data from MetaTrader5 and plot the candlestick chart
 # Function to fetch data from MetaTrader5 and plot the candlestick chart
 def fetch_and_plot():
-   
     global candlestick_data
     global data2graph
+   
 
+
+    # Get the symbol entered by the user
+    user_symbol = symbol.get() # Retrieve the latest value of the symbol
+    
     # Fetch data from MetaTrader5 (fetching last 2 minutes of data)
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1,0 , 10)  # Fetch last 2 minutes
-    if rates is None:
-        print("No data retrieved")
+    rates = mt5.copy_rates_from_pos(user_symbol, mt5.TIMEFRAME_M1, 0, 10)  # Fetch last 2 minutes
+    if rates is None or len(rates) == 0:  # Check for valid data
+        print(f"No data retrieved for symbol: {user_symbol}")
         return
 
     # Create DataFrame with the fetched data
@@ -55,14 +79,10 @@ def fetch_and_plot():
     data_resampled = data.resample('1s').interpolate(method='linear')
 
     # Append new data to the existing DataFrame
-    
-    
     candlestick_data = data_resampled
-
     candlestick_data = candlestick_data._append(data_resampled.iloc[-1:])
 
     # Keep only the last 2 minutes (120 seconds) of data
-
     data2graph = candlestick_data.tail(250)
 
 
