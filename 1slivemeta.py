@@ -28,12 +28,11 @@ graph_frame.grid(row=1, sticky="nsew")
 # Function to fetch data from MetaTrader5 and plot the candlestick chart
 def fetch_and_plot():
     global candlestick_data
+    global data2graph
 
     # Fetch data from MetaTrader5
-    rates = mt5.copy_rates_from_pos("XAUUSD", mt5.TIMEFRAME_M1, 0, 2)  # Fetch last 5 minutes
-    if rates is None:
-        print("No data retrieved")
-        return
+    rates = mt5.copy_rates_from_pos("XAUUSD", mt5.TIMEFRAME_M1, 0, 3)  # Fetch last 5 minutes
+   
 
     # Create DataFrame with the fetched data
     data = pd.DataFrame(rates)
@@ -48,8 +47,10 @@ def fetch_and_plot():
         candlestick_data = data_resampled
     else:
         candlestick_data = candlestick_data._append(data_resampled.iloc[-1:])
+    data2graph = candlestick_data.tail(250)
 
 # Function to create the candlestick graph (initial setup)
+
 def create_candlestick_graph(frame):
     # Create the candlestick chart using mplfinance
     fig, ax = plt.subplots(figsize=(13, 4), dpi=100)
@@ -63,7 +64,7 @@ def create_candlestick_graph(frame):
 # Function to update the candlestick chart
 def update_candlestick_chart(frame):
     
-    global candlestick_data, fig, ax
+    global data2graph, fig, ax
 
     # Fetch the latest data and append to the chart data
     fetch_and_plot()
@@ -72,12 +73,15 @@ def update_candlestick_chart(frame):
     ax.clear()
 
     # Redraw the candlestick chart with the updated data
-    mpf.plot(candlestick_data, type='candle', ax=ax, style='charles')
+    mpf.plot(data2graph, type='candle', ax=ax, style='charles')
 
     return ax
 
 # Global variable to store candlestick data
+
+
 candlestick_data = None
+data2graph = None
 
 # Create the candlestick graph
 fig, ax = create_candlestick_graph(graph_frame)
