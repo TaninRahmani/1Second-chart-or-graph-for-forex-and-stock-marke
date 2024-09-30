@@ -65,11 +65,8 @@ def fetch_and_plot():
     user_symbol = symbol.get() # Retrieve the latest value of the symbol
     
     # Fetch data from MetaTrader5 (fetching last 2 minutes of data)
-    rates = mt5.copy_rates_from_pos(user_symbol, mt5.TIMEFRAME_M1, 0, 10)  # Fetch last 2 minutes
-    if rates is None or len(rates) == 0:  # Check for valid data
-        print(f"No data retrieved for symbol: {user_symbol}")
-        return
-
+    rates = mt5.copy_rates_from_pos(user_symbol, mt5.TIMEFRAME_M1, 0, 180)  # Fetch last 2 minutes
+   
     # Create DataFrame with the fetched data
     data = pd.DataFrame(rates)
     data['time'] = pd.to_datetime(data['time'], unit='s')
@@ -79,12 +76,19 @@ def fetch_and_plot():
     data_resampled = data.resample('1s').interpolate(method='linear')
 
     # Append new data to the existing DataFrame
-    candlestick_data = data_resampled
-    candlestick_data = candlestick_data._append(data_resampled.iloc[-1:])
+    if candlestick_data is None:
+
+        candlestick_data = data_resampled
+    else:
+      candlestick_data = candlestick_data._append(data_resampled.iloc[-1:])
 
     # Keep only the last 2 minutes (120 seconds) of data
     data2graph = candlestick_data.tail(250)
+ 
 
+
+
+# paste in belooww----
 
 # Function to create the candlestick graph (initial setup)
 def create_candlestick_graph(frame):
@@ -114,7 +118,7 @@ def update_candlestick_chart(frame):
     return ax
 
 # Global variable to store candlestick data
-
+candlestick_data=None
 
 # Create the candlestick graph
 fig, ax = create_candlestick_graph(graph_frame)
