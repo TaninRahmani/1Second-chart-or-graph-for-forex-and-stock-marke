@@ -65,16 +65,21 @@ def create_candlestick_graph(frame):
     fig, ax = plt.subplots(figsize=(13, 4), dpi=100)
     canvas = FigureCanvasTkAgg(fig, master=frame)
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    return fig, ax
+    return fig, ax, canvas
 
 def update_candlestick_chart(frame_number):
-    global candlestick_data, fig, ax
+    global candlestick_data, fig, ax, canvas
     fetch_and_plot()
     ax.clear()
     if not candlestick_data.empty:
         mpf.plot(candlestick_data, type='candle', ax=ax, style='charles')
+        canvas.draw()  # ✅ This line updates the canvas
 
-fig, ax = create_candlestick_graph(graph_frame)
+# Create chart and get canvas
+fig, ax, canvas = create_candlestick_graph(graph_frame)
+
+# Animate chart every 1 second
 ani = animation.FuncAnimation(fig, update_candlestick_chart, interval=1000)
 
+# Start GUI
 root.mainloop()
